@@ -1,0 +1,27 @@
+name: Genera infografiche
+on:
+  push:
+    paths: ['infografiche/specs/*.json']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: "infografiche\n.github", fetch-depth: 1 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install playwright==1.47.0 && python -m playwright install --with-deps chromium
+      - name: Render
+        run: |
+          mkdir -p infografiche/img
+          for f in infografiche/specs/*.json; do python infografiche/tool/render.py "$f" infografiche/img; done
+      - name: Commit
+        run: |
+          git config user.name "maka-bot"; git config user.email "maka-bot@users.noreply.github.com"
+          git add infografiche/img
+          git commit -m "Infografiche generate" || exit 0
+          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
