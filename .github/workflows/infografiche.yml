@@ -5,23 +5,37 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency: { group: infografiche, cancel-in-progress: false }
 jobs:
-  render:
+  list:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    outputs: { lotti: "${{ steps.l.outputs.lotti }}" }
     steps:
       - uses: actions/checkout@v4
-        with: { sparse-checkout: "infografiche\n.github", fetch-depth: 1 }
+        with: { sparse-checkout: "infografiche/specs", fetch-depth: 1 }
+      - id: l
+        run: echo "lotti=$(ls infografiche/specs/*.json | xargs -n1 basename | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+  render:
+    needs: list
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy: { fail-fast: false, max-parallel: 12, matrix: { lotto: "${{ fromJson(needs.list.outputs.lotti) }}" } }
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: "infografiche/tool\ninfografiche/specs", fetch-depth: 1 }
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
       - run: pip install playwright==1.47.0 && python -m playwright install --with-deps chromium
       - name: Render
         run: |
           mkdir -p infografiche/img
-          for f in infografiche/specs/*.json; do python infografiche/tool/render.py "$f" infografiche/img; done
+          for f in $(git ls-tree -r --name-only origin/main -- infografiche/img 2>/dev/null); do mkdir -p $(dirname $f); touch $f; done
+          python infografiche/tool/render.py infografiche/specs/${{ matrix.lotto }} infografiche/img
+          find infografiche/img -size 0 -delete
       - name: Commit
         run: |
           git config user.name "maka-bot"; git config user.email "maka-bot@users.noreply.github.com"
+          git sparse-checkout add infografiche/img
           git add infografiche/img
-          git commit -m "Infografiche generate" || exit 0
-          for i in 1 2 3; do git pull --rebase && git push && break; sleep 5; done
+          git commit -qm "Infografiche ${{ matrix.lotto }}" || exit 0
+          for i in 1 2 3 4 5 6 7 8; do git pull -q --rebase origin main && git push -q && break; sleep $((RANDOM % 20 + 5)); done

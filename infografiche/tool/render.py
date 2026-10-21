@@ -71,7 +71,7 @@ async def main():
     local = sys.argv[sys.argv.index('--local-img') + 1] if '--local-img' in sys.argv else None
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        pg = await b.new_page(viewport={'width': 1000, 'height': 1000}, device_scale_factor=2)
+        pg = await b.new_page(viewport={'width': 1000, 'height': 1000}, device_scale_factor=1.6)
         done = 0
         for s in specs:
             dest = os.path.join(out, s['file'])
@@ -80,7 +80,7 @@ async def main():
                 src = ('data:image/jpeg;base64,' + base64.b64encode(open(local, 'rb').read()).decode()) if local else fetch(s['immagine'], '/tmp/imgcache')
                 await pg.set_content(page(s, src), wait_until='networkidle')
                 await pg.evaluate("document.fonts.ready")
-                await pg.screenshot(path=dest, type='jpeg', quality=92, clip={'x': 0, 'y': 0, 'width': 1000, 'height': 1000})
+                await pg.screenshot(path=dest, type='jpeg', quality=85, clip={'x': 0, 'y': 0, 'width': 1000, 'height': 1000})
                 done += 1
             except Exception as ex:
                 print('ERRORE', s.get('sku'), ex)
