@@ -1,0 +1,30 @@
+name: Tabelle misure
+on:
+  push:
+    paths: ['tabelle/ids.json', 'tabelle/specs/*.json', 'tabelle/tool/*']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: { group: tabelle, cancel-in-progress: false }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: "tabelle", fetch-depth: 1 }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pillow playwright==1.47.0
+      - name: Classifica foto
+        run: |
+          if [ ! -f tabelle/colori.json ] || [ tabelle/ids.json -nt tabelle/colori.json ]; then python tabelle/tool/classify.py; fi
+      - name: Render tabelle
+        run: |
+          if ls tabelle/specs/*.json >/dev/null 2>&1; then python -m playwright install --with-deps chromium && python tabelle/tool/render.py; fi
+      - name: Commit
+        run: |
+          git config user.name "maka-bot"; git config user.email "maka-bot@users.noreply.github.com"
+          git add tabelle
+          git commit -qm "Tabelle misure" || exit 0
+          for i in 1 2 3 4 5 6; do git pull -q --rebase origin main && git push -q && break; sleep $((RANDOM % 20 + 5)); done
