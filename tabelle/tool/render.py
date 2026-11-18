@@ -21,7 +21,8 @@ body{width:1000px;height:1000px;font-family:Inter,Arial,sans-serif;background:#f
 .box{background:#f4f5f7;border-radius:11px;padding:8px 13px;flex:none}
 .box .k{font-size:12px;color:#777;text-transform:uppercase;letter-spacing:1px;font-weight:700}
 .box .v{font-size:var(--bv,18px);font-weight:800;margin-top:2px;line-height:1.2}
-.right{flex:1;min-width:0}
+.right{flex:1;min-width:0;display:flex;flex-direction:column}
+.extra{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
 table{border-collapse:separate;border-spacing:0;width:100%}
 th{background:#1d1d1f;color:#fff;font-size:var(--th,20px);padding:10px 6px;font-weight:800;line-height:1.1;vertical-align:middle}
 th:first-child{border-radius:10px 0 0 0;text-align:left;padding-left:16px}th:last-child{border-radius:0 10px 0 0}
@@ -38,14 +39,19 @@ tr:nth-child(even) td{background:#f7f7f8}
 
 FIT = """() => {
  const L=document.querySelector('.left'), R=document.querySelector('.right'), T=document.querySelector('table');
- let bv=18; while(L.scrollHeight>L.clientHeight && bv>15){bv-=1; document.body.style.setProperty('--bv',bv+'px');}
- if(L.scrollHeight>L.clientHeight){L.style.width='330px'; document.querySelector('.ph').style.width='330px'; bv=17; document.body.style.setProperty('--bv',bv+'px');
-   while(L.scrollHeight>L.clientHeight && bv>12){bv-=1; document.body.style.setProperty('--bv',bv+'px');}}
+ const set=(k,v)=>document.body.style.setProperty(k,v);
+ let td=21, th=20;
+ while((T.scrollWidth>R.clientWidth || T.offsetHeight>R.clientHeight) && td>11){td-=1; th=Math.max(12,th-1); set('--td',td+'px'); set('--th',th+'px');
+   const rh=parseFloat(getComputedStyle(document.body).getPropertyValue('--rh')); if(T.offsetHeight>R.clientHeight) set('--rh',Math.max(22,rh-2)+'px');}
+ let bv=18; set('--bv',bv+'px');
+ while(L.scrollHeight>L.clientHeight && bv>15){bv-=1; set('--bv',bv+'px');}
+ if(L.scrollHeight>L.clientHeight){
+   const X=document.createElement('div'); X.className='extra'; R.appendChild(X);
+   const free=()=>R.clientHeight-T.offsetHeight-X.offsetHeight-14;
+   while(L.scrollHeight>L.clientHeight){ const bs=L.querySelectorAll('.box'); if(!bs.length) break; const b=bs[bs.length-1]; X.prepend(b); if(free()<0){L.appendChild(b); break;} }
+ }
+ while(L.scrollHeight>L.clientHeight && bv>12){bv-=1; set('--bv',bv+'px');}
  if(L.scrollHeight>L.clientHeight){document.querySelector('.ph').style.height='140px';}
- let td=parseFloat(getComputedStyle(document.body).getPropertyValue('--td'))||21, th=20;
- while((T.scrollWidth>R.clientWidth || T.offsetHeight>R.clientHeight) && td>11){td-=1; th=Math.max(12,th-1);
-   document.body.style.setProperty('--td',td+'px'); document.body.style.setProperty('--th',th+'px');
-   const rh=parseFloat(getComputedStyle(document.body).getPropertyValue('--rh')); if(T.offsetHeight>R.clientHeight) document.body.style.setProperty('--rh',Math.max(22,rh-2)+'px');}
  return [L.scrollHeight<=L.clientHeight, T.scrollWidth<=R.clientWidth, T.offsetHeight<=R.clientHeight];
 }"""
 
