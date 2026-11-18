@@ -22,6 +22,8 @@ body{width:1000px;height:1000px;font-family:Inter,Arial,sans-serif;background:#f
 .box .k{font-size:12px;color:#777;text-transform:uppercase;letter-spacing:1px;font-weight:700}
 .box .v{font-size:var(--bv,18px);font-weight:800;margin-top:2px;line-height:1.2}
 .right{flex:1;min-width:0;display:flex;flex-direction:column}
+.left.two{width:450px;display:grid;grid-template-columns:1fr 1fr;align-content:start;gap:8px}
+.left.two .ph{grid-column:1/3;width:auto;height:170px}
 .extra{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
 table{border-collapse:separate;border-spacing:0;width:100%}
 th{background:#1d1d1f;color:#fff;font-size:var(--th,20px);padding:10px 6px;font-weight:800;line-height:1.1;vertical-align:middle}
@@ -51,7 +53,12 @@ FIT = """() => {
    while(L.scrollHeight>L.clientHeight){ const bs=L.querySelectorAll('.box'); if(!bs.length) break; const b=bs[bs.length-1]; X.prepend(b); if(free()<0){L.appendChild(b); break;} }
  }
  while(L.scrollHeight>L.clientHeight && bv>12){bv-=1; set('--bv',bv+'px');}
- if(L.scrollHeight>L.clientHeight){document.querySelector('.ph').style.height='140px';}
+ if(L.scrollHeight>L.clientHeight){
+   const X=document.querySelector('.extra'); if(X){for(const b of [...X.querySelectorAll('.box')]) L.appendChild(b); X.remove();}
+   L.classList.add('two'); bv=16; set('--bv',bv+'px');
+   while(L.scrollHeight>L.clientHeight && bv>12){bv-=1; set('--bv',bv+'px');}
+   while((T.scrollWidth>R.clientWidth || T.offsetHeight>R.clientHeight) && td>11){td-=1; th=Math.max(12,th-1); set('--td',td+'px'); set('--th',th+'px');}
+ }
  return [L.scrollHeight<=L.clientHeight, T.scrollWidth<=R.clientWidth, T.offsetHeight<=R.clientHeight];
 }"""
 
