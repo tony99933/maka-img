@@ -27,7 +27,7 @@ th{background:#1d1d1f;color:#fff;font-size:var(--th,20px);padding:10px 6px;font-
 th:first-child{border-radius:10px 0 0 0;text-align:left;padding-left:16px}th:last-child{border-radius:0 10px 0 0}
 th .s{display:block;font-size:12px;font-weight:600;color:#c9c9c9;margin-top:3px}
 td{font-size:var(--td,21px);height:var(--rh,40px);padding:0 6px;text-align:center;border-bottom:1px solid #e6e6e6;font-weight:600;line-height:1.1;vertical-align:middle}
-td:first-child{font-weight:800;text-align:left;padding-left:16px}
+td:first-child{font-weight:800;text-align:left;padding-left:16px;white-space:nowrap}
 td.tx{font-size:calc(var(--td,21px) * .8)}
 tr:nth-child(even) td{background:#f7f7f8}
 .ok{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#1f9d55;color:#fff;font-size:18px;font-weight:900}
@@ -38,8 +38,10 @@ tr:nth-child(even) td{background:#f7f7f8}
 
 FIT = """() => {
  const L=document.querySelector('.left'), R=document.querySelector('.right'), T=document.querySelector('table');
- let bv=18; while(L.scrollHeight>L.clientHeight && bv>11){bv-=1; document.body.style.setProperty('--bv',bv+'px');}
- if(L.scrollHeight>L.clientHeight){document.querySelector('.ph').style.height='150px'; }
+ let bv=18; while(L.scrollHeight>L.clientHeight && bv>15){bv-=1; document.body.style.setProperty('--bv',bv+'px');}
+ if(L.scrollHeight>L.clientHeight){L.style.width='330px'; document.querySelector('.ph').style.width='330px'; bv=17; document.body.style.setProperty('--bv',bv+'px');
+   while(L.scrollHeight>L.clientHeight && bv>12){bv-=1; document.body.style.setProperty('--bv',bv+'px');}}
+ if(L.scrollHeight>L.clientHeight){document.querySelector('.ph').style.height='140px';}
  let td=parseFloat(getComputedStyle(document.body).getPropertyValue('--td'))||21, th=20;
  while((T.scrollWidth>R.clientWidth || T.offsetHeight>R.clientHeight) && td>11){td-=1; th=Math.max(12,th-1);
    document.body.style.setProperty('--td',td+'px'); document.body.style.setProperty('--th',th+'px');
